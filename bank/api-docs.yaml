@@ -1,0 +1,541 @@
+openapi: 3.1.0
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+paths:
+  /api/v1/users:
+    get:
+      tags:
+      - Users
+      summary: Get all users by hair color and gender
+      operationId: getAllUsersByHairColorAndGender
+      parameters:
+      - name: hair-color
+        in: query
+        required: true
+        schema:
+          type: string
+          enum:
+          - RED
+          - BLUE
+          - YELLOW
+          - GREEN
+          - WHITE
+          - BLACK
+      - name: gender
+        in: query
+        required: true
+        schema:
+          type: string
+          enum:
+          - MAN
+          - WOMAN
+      responses:
+        "200":
+          description: Users list found
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserResponse"
+    post:
+      tags:
+      - Users
+      summary: Create user
+      operationId: createUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreateRequest"
+        required: true
+      responses:
+        "201":
+          description: User created
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          description: Incorrect user arguments
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+  /api/v1/users/{userId}/friends:
+    get:
+      tags:
+      - Users
+      summary: Get all friends by user id
+      operationId: getAllFriendsByUserId
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Friends list found
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserResponse"
+    post:
+      tags:
+      - Users
+      summary: Add friend to user by id
+      operationId: addUserFriend
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: friend-id
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Successful friend adding
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "404":
+          description: Incorrect users id
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+    delete:
+      tags:
+      - Users
+      summary: Delete user friend by id
+      operationId: removeUserFriend
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: friend-id
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Successful friend deleting
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "404":
+          description: Incorrect users id
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+  /api/v1/users/{userId}/accounts:
+    get:
+      tags:
+      - Accounts
+      summary: Get all accounts by owner user id
+      operationId: getAllAccountsByUserId
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Accounts list found
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AccountResponse"
+    post:
+      tags:
+      - Accounts
+      summary: Create account
+      operationId: createAccount
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "400":
+          description: Incorrect arguments
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AccountResponse"
+        "201":
+          description: Account created
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AccountResponse"
+  /api/v1/accounts/{accountId}/withdraws:
+    post:
+      tags:
+      - Operations
+      summary: Bank account withdraw
+      operationId: withdraw
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: amount
+        in: query
+        required: true
+        schema:
+          type: number
+          format: double
+      responses:
+        "200":
+          description: Successful withdraw
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OperationResponse"
+        "400":
+          description: Incorrect amount
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OperationResponse"
+        "404":
+          description: Account not found
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OperationResponse"
+  /api/v1/accounts/{accountId}/transfers:
+    post:
+      tags:
+      - Operations
+      summary: Bank account transfer
+      operationId: transfer
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: target-account-id
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: amount
+        in: query
+        required: true
+        schema:
+          type: number
+          format: double
+      responses:
+        "200":
+          description: Successful transfer
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OperationResponse"
+        "400":
+          description: Incorrect amount
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OperationResponse"
+        "404":
+          description: Incorrect accounts id
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OperationResponse"
+  /api/v1/accounts/{accountId}/deposits:
+    post:
+      tags:
+      - Operations
+      summary: Bank account deposit
+      operationId: deposit
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: amount
+        in: query
+        required: true
+        schema:
+          type: number
+          format: double
+      responses:
+        "200":
+          description: Successful deposit
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OperationResponse"
+        "400":
+          description: Incorrect amount
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OperationResponse"
+        "404":
+          description: Account not found
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OperationResponse"
+  /api/v1/users/{id}:
+    get:
+      tags:
+      - Users
+      summary: Get user by id
+      operationId: getUserById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: User found
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "404":
+          description: User not found
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+  /api/v1/accounts:
+    get:
+      tags:
+      - Accounts
+      summary: Get all accounts
+      operationId: getAllAccounts
+      responses:
+        "200":
+          description: Accounts list found
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AccountResponse"
+  /api/v1/accounts/{id}:
+    get:
+      tags:
+      - Accounts
+      summary: Get account by id
+      operationId: getAccountById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Account found
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AccountResponse"
+        "404":
+          description: Account not found
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AccountResponse"
+  /api/v1/accounts/{accountId}/operations:
+    get:
+      tags:
+      - Operations
+      summary: Get all operations by type and accountId
+      operationId: getAllOperationsByTypeAndAccountId
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: type
+        in: query
+        required: true
+        schema:
+          type: string
+          enum:
+          - CHECK_BALANCE
+          - WITHDRAW
+          - DEPOSIT
+          - CREATE_ACCOUNT
+      responses:
+        "200":
+          description: Operations list found
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OperationResponse"
+  /api/v1/accounts/{accountId}/balance:
+    get:
+      tags:
+      - Accounts
+      summary: Get account balance
+      operationId: getBalance
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Balance found
+          content:
+            '*/*':
+              schema:
+                type: number
+                format: double
+        "400":
+          description: Account not found
+          content:
+            '*/*':
+              schema:
+                type: number
+                format: double
+components:
+  schemas:
+    UserCreateRequest:
+      type: object
+      properties:
+        login:
+          type: string
+        name:
+          type: string
+        age:
+          type: integer
+          format: int32
+        gender:
+          type: string
+          enum:
+          - MAN
+          - WOMAN
+        hairColor:
+          type: string
+          enum:
+          - RED
+          - BLUE
+          - YELLOW
+          - GREEN
+          - WHITE
+          - BLACK
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        login:
+          type: string
+        name:
+          type: string
+        age:
+          type: integer
+          format: int32
+        gender:
+          type: string
+          enum:
+          - MAN
+          - WOMAN
+        hairColor:
+          type: string
+          enum:
+          - RED
+          - BLUE
+          - YELLOW
+          - GREEN
+          - WHITE
+          - BLACK
+        friendsId:
+          type: array
+          items:
+            type: integer
+            format: int64
+          uniqueItems: true
+    AccountResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        balance:
+          type: number
+          format: double
+        ownerId:
+          type: integer
+          format: int64
+        operationsId:
+          type: array
+          items:
+            type: integer
+            format: int64
+    OperationResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        accountId:
+          type: integer
+          format: int64
+        operationType:
+          type: string
+          enum:
+          - CHECK_BALANCE
+          - WITHDRAW
+          - DEPOSIT
+          - CREATE_ACCOUNT
+        dateTime:
+          type: string
+          format: date-time
